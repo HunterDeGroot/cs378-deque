@@ -24,10 +24,10 @@ Google Test Libraries:
     /usr/lib/libgtest_main.a
 
 To compile the test:
-    % g++-4.7 -fprofile-arcs -ftest-coverage -pedantic -std=c++11 -Wall Integer.c++ TestInteger.c++ -o TestInteger -lgtest -lgtest_main -lpthread
+    % g++-4.7 -fprofile-arcs -ftest-coverage -pedantic -std=c++11 -Wall TestDeque.c++ -o TestDeque -lgtest -lgtest_main -lpthread
 
 To run the test:
-    % valgrind TestInteger
+    % valgrind TestDeque
 
 To obtain coverage of the test:
     % gcov-4.7 -b Integer.c++ TestInteger.c++
@@ -106,3 +106,18 @@ TYPED_TEST(TestDeque, Size) {
     deque_type x;
     const size_type s = x.size();
     ASSERT_EQ(0, s);}
+
+TYPED_TEST(TestDeque, Subscript) {
+    typedef typename TestFixture::deque_type      deque_type;
+    typedef typename TestFixture::allocator_type  allocator_type;
+    typedef typename TestFixture::value_type      value_type;
+    typedef typename TestFixture::size_type       size_type;
+    typedef typename TestFixture::difference_type difference_type;
+    typedef typename TestFixture::pointer         pointer;
+    typedef typename TestFixture::const_pointer   const_pointer;
+    typedef typename TestFixture::reference       reference;
+    typedef typename TestFixture::const_reference const_reference;
+
+    my_deque<int> md = my_deque<int>(13,2);
+    ASSERT_EQ(2,md[12]);
+}
