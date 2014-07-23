@@ -77,37 +77,54 @@ typedef testing::Types<
 
 TYPED_TEST_CASE(TestDeque, my_types);
 
-TYPED_TEST(TestDeque, Empty) {
-    typedef typename TestFixture::deque_type      deque_type;
-    typedef typename TestFixture::allocator_type  allocator_type;
-    typedef typename TestFixture::value_type      value_type;
-    typedef typename TestFixture::size_type       size_type;
-    typedef typename TestFixture::difference_type difference_type;
-    typedef typename TestFixture::pointer         pointer;
-    typedef typename TestFixture::const_pointer   const_pointer;
-    typedef typename TestFixture::reference       reference;
-    typedef typename TestFixture::const_reference const_reference;
+// TYPED_TEST(TestDeque, Empty) {
+//     typedef typename TestFixture::deque_type      deque_type;
+//     typedef typename TestFixture::allocator_type  allocator_type;
+//     typedef typename TestFixture::value_type      value_type;
+//     typedef typename TestFixture::size_type       size_type;
+//     typedef typename TestFixture::difference_type difference_type;
+//     typedef typename TestFixture::pointer         pointer;
+//     typedef typename TestFixture::const_pointer   const_pointer;
+//     typedef typename TestFixture::reference       reference;
+//     typedef typename TestFixture::const_reference const_reference;
 
-    deque_type x;
-    const bool b = x.empty();
-    ASSERT_TRUE(b);}
+//     deque_type x;
+//     const bool b = x.empty();
+//     ASSERT_TRUE(b);}
 
-TYPED_TEST(TestDeque, Size) {
-    typedef typename TestFixture::deque_type      deque_type;
-    typedef typename TestFixture::allocator_type  allocator_type;
-    typedef typename TestFixture::value_type      value_type;
-    typedef typename TestFixture::size_type       size_type;
-    typedef typename TestFixture::difference_type difference_type;
-    typedef typename TestFixture::pointer         pointer;
-    typedef typename TestFixture::const_pointer   const_pointer;
-    typedef typename TestFixture::reference       reference;
-    typedef typename TestFixture::const_reference const_reference;
+// TYPED_TEST(TestDeque, Size) {
+//     typedef typename TestFixture::deque_type      deque_type;
+//     typedef typename TestFixture::allocator_type  allocator_type;
+//     typedef typename TestFixture::value_type      value_type;
+//     typedef typename TestFixture::size_type       size_type;
+//     typedef typename TestFixture::difference_type difference_type;
+//     typedef typename TestFixture::pointer         pointer;
+//     typedef typename TestFixture::const_pointer   const_pointer;
+//     typedef typename TestFixture::reference       reference;
+//     typedef typename TestFixture::const_reference const_reference;
 
-    deque_type x;
-    const size_type s = x.size();
-    ASSERT_EQ(0, s);}
+//     deque_type x;
+//     const size_type s = x.size();
+//     ASSERT_EQ(0, s);}
 
-TYPED_TEST(TestDeque, Subscript) {
+// TYPED_TEST(TestDeque, Subscript) {
+//     typedef typename TestFixture::deque_type      deque_type;
+//     typedef typename TestFixture::allocator_type  allocator_type;
+//     typedef typename TestFixture::value_type      value_type;
+//     typedef typename TestFixture::size_type       size_type;
+//     typedef typename TestFixture::difference_type difference_type;
+//     typedef typename TestFixture::pointer         pointer;
+//     typedef typename TestFixture::const_pointer   const_pointer;
+//     typedef typename TestFixture::reference       reference;
+//     typedef typename TestFixture::const_reference const_reference;
+
+//     my_deque<int> md = my_deque<int>(13,2);
+//     ASSERT_EQ(2,md[12]);
+//     my_deque<int> md2 = my_deque<int>();
+//     md = md2;
+// }
+
+TYPED_TEST(TestDeque, Iterator) {
     typedef typename TestFixture::deque_type      deque_type;
     typedef typename TestFixture::allocator_type  allocator_type;
     typedef typename TestFixture::value_type      value_type;
@@ -119,5 +136,14 @@ TYPED_TEST(TestDeque, Subscript) {
     typedef typename TestFixture::const_reference const_reference;
 
     my_deque<int> md = my_deque<int>(13,2);
-    ASSERT_EQ(2,md[12]);
+    md.print_deque();
+
+    my_deque<int> md1 = my_deque<int>(28,5);
+    md1.print_deque();
+
+    my_deque<int> md3 = my_deque<int>(md1);
+    // my_deque<int>::iterator b = md1.begin(); 
+    // my_deque<int>::iterator e = md1.end(); 
+
+   md3.print_deque();
 }

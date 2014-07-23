@@ -46,9 +46,16 @@ BI destroy (A& a, BI b, BI e) {
 
 template <typename A, typename II, typename BI>
 BI uninitialized_copy (A& a, II b, II e, BI x) {
+    cout << "IN COPY" << endl;
     BI p = x;
     try {
+        cout << "IN TRY" << endl;
+        int i = 0;
         while (b != e) {
+            cout << i << endl;
+            if(i == 30) break;
+            ++i;
+            cout << *b;
             a.construct(&*x, *b);
             ++b;
             ++x;}}
@@ -152,7 +159,7 @@ class my_deque {
         // valid
         // -----
 
-        bool valid () const {
+        bool valid () const { 
             return (!_b && !_e && !_cei) || (_bi <= _ei);}
 
     public:
@@ -523,23 +530,23 @@ class my_deque {
         explicit my_deque (const allocator_type& a = allocator_type()) :
                 _a (a) {
             _pa = std::allocator<T*>();
+
             _b = _e = 0;
             _bi = _cbi = _cei = _ei = 0;
             _size = 0;
-            assert(valid());}
+            assert(valid());
+
+            cout << "valids fault if im not reached" << endl;}
 
         /**
          * <your documentation>
          */
         explicit my_deque (size_type s, const_reference v = value_type(), const allocator_type& a = allocator_type()) :
                 _a (a) {
-                    cout << "made it in \n";
            _pa = std::allocator<T*>();
             size_type numBlocks = (s-1)/10 + 1;
 
             _cont = _pa.allocate(numBlocks);
-
-            cout << "allocated the initial block container with " << numBlocks << " blocks\n";
             size_type i;
             for(i = 0; i < numBlocks; ++i){
                 _cont[i] = _a.allocate(10);
@@ -560,7 +567,6 @@ class my_deque {
                 _a (that._a) {
             _pa = std::allocator<T*>();
             size_type numBlocks = (that.size()-1)/10 +1;
-            
             _cont = _pa.allocate(numBlocks);
 
             size_type i;
@@ -572,6 +578,14 @@ class my_deque {
             _e = _cont[numBlocks-1] + (that.size()-1)%10;
             _cei = _ei = &_cont[numBlocks-1];
             _size = that.size();
+            
+            iterator b = begin();
+            iterator e = end();
+
+            while(b!=e){
+                cout << *b;
+                ++b;}
+
             uninitialized_copy(_a, that.begin(), that.end(), begin());
             assert(valid());}
 
@@ -609,9 +623,10 @@ class my_deque {
          * <your documentation>
          */
         my_deque& operator = (const my_deque& rhs) {
-            *this = my_deque(rhs);
-            assert(valid());
-            return *this;}
+            //*this = my_deque(rhs);
+            return *this;
+            }// assert(valid());
+            // return *this;}
 
         // -----------
         // operator []
@@ -829,7 +844,7 @@ class my_deque {
          * <your documentation>
          */
         size_type size () const {
-            return _e - _b;}
+            return _size;}
 
         // ----
         // swap
@@ -839,6 +854,49 @@ class my_deque {
          * <your documentation>
          */
         void swap (my_deque&) {
-            assert(valid());}};
+            assert(valid());}
+
+        void print_deque(){
+
+            size_type s = _cei - _cbi;
+            size_type i;
+            size_type offs = 0;
+            size_type index = 0;
+            for(i = 0; i <= s; ++i){
+
+                size_type x;
+                for(x = 0; x < 10; ++x){
+                    offs = x;
+                    if(&_cont[i][x] == _b) break;
+                    cout << 0;
+                }
+                index = i;
+                if(&_cont[i][x] == _b) break;
+                cout << endl;
+            }
+
+            iterator b = begin();
+            iterator e = end();
+
+            while(b!=e){
+                cout << *b;
+                ++offs;
+                if(offs % 10 == 0){
+                    cout << endl;
+                    ++index; 
+                }
+                ++b;
+            }
+            offs %= 10;
+            for(i = index; i <= s; ++i){
+
+                size_type x;
+                for(x = offs; x < 10; ++x){
+                    cout << 0;
+                }
+                offs = 0;
+                cout << endl;
+            }
+        }};
 
 #endif // Deque_h
