@@ -53,7 +53,6 @@ BI uninitialized_copy (A& a, II b, II e, BI x) {
         int i = 0;
         while (b != e) {
             cout << i << endl;
-            if(i == 30) break;
             ++i;
             cout << *b;
             a.construct(&*x, *b);
@@ -398,7 +397,7 @@ class my_deque {
                 // data
                 // ----
 
-                const size_type _index;
+                size_type _index;
                 const my_deque* _p;
 
             private:
@@ -417,7 +416,7 @@ class my_deque {
                 /**
                  * <your documentation>
                  */
-                const_iterator (const my_deque* p, const size_t index) :
+                const_iterator (const my_deque* p, size_t index) :
 
                     _index(index),
                     _p(p)
@@ -438,10 +437,7 @@ class my_deque {
                  * <your documentation>
                  */
                 reference operator * () const {
-                    // <your code>
-                    // dummy is just to be able to compile the skeleton, remove it
-                    static value_type dummy;
-                    return dummy;}
+                    return (*_p)[_index];}
 
                 // -----------
                 // operator ->
@@ -461,7 +457,7 @@ class my_deque {
                  * <your documentation>
                  */
                 const_iterator& operator ++ () {
-                    // <your code>
+                    ++_index;
                     assert(valid());
                     return *this;}
 
@@ -502,8 +498,8 @@ class my_deque {
                 /**
                  * <your documentation>
                  */
-                const_iterator& operator += (difference_type) {
-                    // <your code>
+                const_iterator& operator += (difference_type d) {
+                    _index += d;
                     assert(valid());
                     return *this;}
 
@@ -514,8 +510,8 @@ class my_deque {
                 /**
                  * <your documentation>
                  */
-                const_iterator& operator -= (difference_type) {
-                    // <your code>
+                const_iterator& operator -= (difference_type d) {
+                    _index -= d;
                     assert(valid());
                     return *this;}};
 
