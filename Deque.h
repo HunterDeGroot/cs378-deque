@@ -69,7 +69,7 @@ BI uninitialized_fill (A& a, BI b, BI e, const U& v) {
     BI p = b;
     try {
         while (b != e) {
-            //cout << i << " " << v << endl;
+            cout << i << " " << v << endl;
             ++i;
             a.construct(&*b, v);
             ++b;}}
@@ -625,9 +625,10 @@ class my_deque {
             if(_b + index < *_bi + 10)
                 return *(_b + index);
             else{
+                size_type temp = _bi - _cbi;
                 int offs = 10 - (_b - *_bi);
                 index -= offs;
-                return (*(_bi + index/10 + 1))[index%10];}}
+                return _cont[temp + index/10 + 1][index%10];}}
 
         /**
          * <your documentation>
@@ -731,12 +732,17 @@ class my_deque {
          * <your documentation>
          */
         iterator erase (iterator it) {
-            while(it != end() - 1)
-		*it = *(it+1);
-	    *it = T();
-	    --_size;
+            while(it != end() - 1){
+		        *it = *(it+1);
+                ++it;}
+	        destroy(_a,end()-1,end());
+            --_e;
+            if(_e < *_ei){
+                --_ei;
+                _e = *_ei + 9;}
+	        --_size;
             assert(valid());
-            return iterator();}
+            return it;}
 
         // -----
         // front
@@ -746,7 +752,7 @@ class my_deque {
          * <your documentation>
          */
         reference front () {
-            return *this[0];}
+            return (*this)[0];}
 
         /**
          * <your documentation>
@@ -762,13 +768,19 @@ class my_deque {
          * <your documentation>
          */
         iterator insert (iterator i, const_reference v) {
-	    resize(size+1);
+	    resize(size()+1);
 	    iterator it = end() - 1;
-	    while(it != i)
-		*it = *(it-1);
+	    while(it != i){
+		  *it = *(it-1);
+          --it;}
 	    *it = v;
-            assert(valid());
-            return iterator();}
+        ++_e;
+        if(_e == *_ei + 10){
+            ++_ei;
+            _e = *_ei;}
+
+        assert(valid());
+        return i;}
 
         // ---
         // pop
@@ -812,10 +824,10 @@ class my_deque {
          void print_deque(){
 
             size_type s = _cei - _cbi;
-            size_type i;
+            size_type i = 0;
             size_type offs = 0;
             size_type index = 0;
-            for(i = 0; i <= s; ++i){
+            for(i = 0; i < s; ++i){
 
                 size_type x;
                 for(x = 0; x < 10; ++x){
@@ -840,6 +852,7 @@ class my_deque {
                 }
                 ++b;
             }
+
             offs %= 10;
             for(i = index; i <= s; ++i){
 
@@ -859,8 +872,7 @@ class my_deque {
          */
         void resize (size_type s, const_reference v = value_type()) {
             size_type cap = _cei - _ei;
-            size_type newEndCap = _cei - _ei + 1;
-            size_type from_EIto_BI = _ei - _bi;
+            size_type from_EIto_BI = _ei - _bi + 1;
             T** i;
             if(s == _size)
                 return;
@@ -870,61 +882,59 @@ class my_deque {
                     if((_e - *i) >= 0 && (_e - *i) <= 9) break;
                 _ei = i;
                 _size = s;
-            } else if(s - _size <= (newEndCap * 10)+from_EIto_BI){
+            } else if(_ei != 0 && s - _size <= (cap * 10)+(10-(_e - *_ei)-1)){
                 size_type endTemp = _size;
-                // cout << "endTemp: " << endTemp << endl;
+                cout << _size << endl;
                 _size = s;
-                // cout << "start fill" << endl;
-                // cout << "Containers given to fill" << endl;
-                // for(i = _cbi; i <= _cei; ++i){
-                //     cout << *i << endl;
-                // }
-                // cout << "begin index is : " << _bi - _cont << endl;
-                _e = &*uninitialized_fill(_a, iterator(this,endTemp), begin() + s, v);
-                // cout << "_e is : " << _e << endl;
-
+                cout << s << endl;
+                _e = &*uninitialized_fill(_a, iterator(this,endTemp), end(), v);
+                cout << "hey phil" << endl;
                 for(i = _bi; i <= _cei; ++i){
-                    // cout << "in for loop" << endl;
-                    // cout << *i << endl;
                     if((_e - *i) >= 0 && (_e - *i) <= 9){
-                        // cout << "broke out of loop" << endl;
                         break;
                     }       
                 }
                  _ei = i;
-                // cout << "end index should be " << _ei - _cont  << endl;
             } else{
-                // cout << "Original given to new" << endl;
-                // for(i = _cbi; i <= _cei; ++i){
-                //     cout << *i << endl;
-                // }
-                // cout << "|" << cap << "|\n";
+                cout << "resize" << endl;
                 T** newCont;
                 _pa = std::allocator<T*>();
                 size_type wholeCap = _cei - _cbi + 1;
-                // cout <<"\n\n"<< wholeCap << "\n\n";
-                size_type numBlocks = std::max(wholeCap*3,(s/10)*3);
+                size_type numBlocks = (s/10)*3;
+                cout << numBlocks << endl;
+                if(numBlocks == 0)
+                    numBlocks = s*3;
                 size_type halfBlock = numBlocks/3;
                 newCont = _pa.allocate(numBlocks);
+                cout << halfBlock << endl;
+                cout << from_EIto_BI << endl;
                 size_type ind;
                 size_type counter = 0;
-                // cout << "New Container Addresses" << endl;
                 for(ind = 0; ind < numBlocks; ++ind){
-                    if((ind >= halfBlock) && (ind < halfBlock + wholeCap)){
+                    if(_cei != 0 && (ind >= halfBlock-1) && (ind < halfBlock-1 + from_EIto_BI)){
+                        cout << "copied " << _cont[counter] << endl;
                         newCont[ind] = _cont[counter];
                         ++counter;
                     }
-                    else
+                    else{
                         newCont[ind] = _a.allocate(10);
-                    // cout << newCont[ind] << endl;
+                        cout << "new allocator ind: " << ind <<  " at " << newCont[ind] << endl;}
                 }
-                _bi = newCont + halfBlock;
-                _ei = newCont + halfBlock + from_EIto_BI;
-                _pa.deallocate(_cont,wholeCap);
+                _bi = &newCont[halfBlock - 1];
+                _ei = &newCont[halfBlock - 1 +  from_EIto_BI - 1];
+                if(counter == 0){
+                    _b = _e = *_bi;
+                }
+                size_type a = _cei - _cbi;
+                if(a != 0)
+                    _pa.deallocate(_cont,a);
                 _cont = newCont;   
                 _cbi = _cont;
                 _cei = &_cont[numBlocks-1];
-                //print_deque();
+                cout << "BI Addr: " << *_bi << endl << "EI Addr " << *_ei << endl;
+
+                cout << "CBI Addr: " << *_cbi << endl << "CEI Addr: " << *_cei << endl;
+                cout << "finished resize" << endl;
                 resize(s,v);
             }
             assert(valid());}
