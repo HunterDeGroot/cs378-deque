@@ -46,15 +46,11 @@ BI destroy (A& a, BI b, BI e) {
 
 template <typename A, typename II, typename BI>
 BI uninitialized_copy (A& a, II b, II e, BI x) {
-    cout << "IN COPY" << endl;
     BI p = x;
     try {
-        cout << "IN TRY" << endl;
         int i = 0;
         while (b != e) {
-            cout << i << endl;
             ++i;
-            cout << *b;
             a.construct(&*x, *b);
             ++b;
             ++x;}}
@@ -69,9 +65,12 @@ BI uninitialized_copy (A& a, II b, II e, BI x) {
 
 template <typename A, typename BI, typename U>
 BI uninitialized_fill (A& a, BI b, BI e, const U& v) {
+    int i = 0;
     BI p = b;
     try {
         while (b != e) {
+            //cout << i << " " << v << endl;
+            ++i;
             a.construct(&*b, v);
             ++b;}}
     catch (...) {
@@ -111,9 +110,9 @@ class my_deque {
          * <your documentation>
          */
         friend bool operator == (const my_deque& lhs, const my_deque& rhs) {
-            // <your code>
-            // you must use std::equal()
-            return true;}
+            if(lhs._size == rhs._size)
+		return equal(lhs.begin(),lhs.end(),rhs.begin());
+            return false;}
 
         // ----------
         // operator <
@@ -123,9 +122,7 @@ class my_deque {
          * <your documentation>
          */
         friend bool operator < (const my_deque& lhs, const my_deque& rhs) {
-            // <your code>
-            // you must use std::lexicographical_compare()
-            return true;}
+            return lexicographical_compare(lhs.begin(),lhs.end(),rhs.begin(),rhs.end());}
 
     private:
         // ----
@@ -478,7 +475,7 @@ class my_deque {
                  * <your documentation>
                  */
                 const_iterator& operator -- () {
-                    // <your code>
+                    --_index;
                     assert(valid());
                     return *this;}
 
@@ -530,9 +527,7 @@ class my_deque {
             _b = _e = 0;
             _bi = _cbi = _cei = _ei = 0;
             _size = 0;
-            assert(valid());
-
-            cout << "valids fault if im not reached" << endl;}
+            assert(valid());}
 
         /**
          * <your documentation>
@@ -574,14 +569,7 @@ class my_deque {
             _e = _cont[numBlocks-1] + (that.size()-1)%10;
             _cei = _ei = &_cont[numBlocks-1];
             _size = that.size();
-            
-            iterator b = begin();
-            iterator e = end();
-
-            while(b!=e){
-                cout << *b;
-                ++b;}
-
+           
             uninitialized_copy(_a, that.begin(), that.end(), begin());
             assert(valid());}
 
@@ -619,10 +607,9 @@ class my_deque {
          * <your documentation>
          */
         my_deque& operator = (const my_deque& rhs) {
-            //*this = my_deque(rhs);
-            return *this;
-            }// assert(valid());
-            // return *this;}
+            *this = my_deque(rhs);
+            assert(valid());
+            return *this;}
 
         // -----------
         // operator []
@@ -638,11 +625,9 @@ class my_deque {
             if(_b + index < *_bi + 10)
                 return *(_b + index);
             else{
-
                 int offs = 10 - (_b - *_bi);
                 index -= offs;
-                return (*(_bi + index/10 + 1))[index%10];
-            }}
+                return (*(_bi + index/10 + 1))[index%10];}}
 
         /**
          * <your documentation>
@@ -658,16 +643,16 @@ class my_deque {
          * <your documentation>
          */
         reference at (size_type index) {
-            // <your code>
-            // dummy is just to be able to compile the skeleton, remove it
-            static value_type dummy;
-            return dummy;}
+            if (index >= size())
+                throw std::out_of_range("deque");
+            return (*this)[index];}
 
         /**
          * <your documentation>
          */
         const_reference at (size_type index) const {
             return const_cast<my_deque*>(this)->at(index);}
+
 
         // ----
         // back
@@ -677,10 +662,7 @@ class my_deque {
          * <your documentation>
          */
         reference back () {
-            // <your code>
-            // dummy is just to be able to compile the skeleton, remove it
-            static value_type dummy;
-            return dummy;}
+            return const_cast<my_deque*>(this)->back();}
 
         /**
          * <your documentation>
@@ -712,7 +694,7 @@ class my_deque {
          * <your documentation>
          */
         void clear () {
-            // <your code>
+	    resize(0);            
             assert(valid());}
 
         // -----
@@ -748,8 +730,11 @@ class my_deque {
         /**
          * <your documentation>
          */
-        iterator erase (iterator) {
-            // <your code>
+        iterator erase (iterator it) {
+            while(it != end() - 1)
+		*it = *(it+1);
+	    *it = T();
+	    --_size;
             assert(valid());
             return iterator();}
 
@@ -761,10 +746,7 @@ class my_deque {
          * <your documentation>
          */
         reference front () {
-            // <your code>
-            // dummy is just to be able to compile the skeleton, remove it
-            static value_type dummy;
-            return dummy;}
+            return *this[0];}
 
         /**
          * <your documentation>
@@ -779,8 +761,12 @@ class my_deque {
         /**
          * <your documentation>
          */
-        iterator insert (iterator, const_reference) {
-            // <your code>
+        iterator insert (iterator i, const_reference v) {
+	    resize(size+1);
+	    iterator it = end() - 1;
+	    while(it != i)
+		*it = *(it-1);
+	    *it = v;
             assert(valid());
             return iterator();}
 
@@ -792,15 +778,16 @@ class my_deque {
          * <your documentation>
          */
         void pop_back () {
-            // <your code>
+            assert(!empty());
+	    resize(size() - 1);
             assert(valid());}
 
         /**
          * <your documentation>
          */
         void pop_front () {
-             assert(!empty());
-            //resize(size() - 1);
+            assert(!empty());
+            erase(begin());
             assert(valid());}
 
         // ----
@@ -810,49 +797,19 @@ class my_deque {
         /**
          * <your documentation>
          */
-        void push_back (const_reference) {
-           //resize(size() + 1, v);
+        void push_back (const_reference v) {
+            resize(size() + 1, v);
             assert(valid());}
 
         /**
          * <your documentation>
          */
-        void push_front (const_reference) {
-            // <your code>
+        void push_front (const_reference v) {
+            insert(begin(), v);
             assert(valid());}
 
-        // ------
-        // resize
-        // ------
 
-        /**
-         * <your documentation>
-         */
-        void resize (size_type s, const_reference v = value_type()) {
-            // <your code>
-            assert(valid());}
-
-        // ----
-        // size
-        // ----
-
-        /**
-         * <your documentation>
-         */
-        size_type size () const {
-            return _size;}
-
-        // ----
-        // swap
-        // ----
-
-        /**
-         * <your documentation>
-         */
-        void swap (my_deque&) {
-            assert(valid());}
-
-        void print_deque(){
+         void print_deque(){
 
             size_type s = _cei - _cbi;
             size_type i;
@@ -891,8 +848,105 @@ class my_deque {
                     cout << 0;
                 }
                 offs = 0;
-                cout << endl;
+                cout << endl;}}
+
+        // ------
+        // resize
+        // ------
+
+        /**
+         * <your documentation>
+         */
+        void resize (size_type s, const_reference v = value_type()) {
+            size_type cap = _cei - _ei;
+            size_type newEndCap = _cei - _ei + 1;
+            size_type from_EIto_BI = _ei - _bi;
+            T** i;
+            if(s == _size)
+                return;
+            if(s < _size) {
+                _e = &*destroy(_a, begin() + s, end());
+                for(i = _cont + 0; i < _cei; ++i)
+                    if((_e - *i) >= 0 && (_e - *i) <= 9) break;
+                _ei = i;
+                _size = s;
+            } else if(s - _size <= (newEndCap * 10)+from_EIto_BI){
+                size_type endTemp = _size;
+                // cout << "endTemp: " << endTemp << endl;
+                _size = s;
+                // cout << "start fill" << endl;
+                // cout << "Containers given to fill" << endl;
+                // for(i = _cbi; i <= _cei; ++i){
+                //     cout << *i << endl;
+                // }
+                // cout << "begin index is : " << _bi - _cont << endl;
+                _e = &*uninitialized_fill(_a, iterator(this,endTemp), begin() + s, v);
+                // cout << "_e is : " << _e << endl;
+
+                for(i = _bi; i <= _cei; ++i){
+                    // cout << "in for loop" << endl;
+                    // cout << *i << endl;
+                    if((_e - *i) >= 0 && (_e - *i) <= 9){
+                        // cout << "broke out of loop" << endl;
+                        break;
+                    }       
+                }
+                 _ei = i;
+                // cout << "end index should be " << _ei - _cont  << endl;
+            } else{
+                // cout << "Original given to new" << endl;
+                // for(i = _cbi; i <= _cei; ++i){
+                //     cout << *i << endl;
+                // }
+                // cout << "|" << cap << "|\n";
+                T** newCont;
+                _pa = std::allocator<T*>();
+                size_type wholeCap = _cei - _cbi + 1;
+                // cout <<"\n\n"<< wholeCap << "\n\n";
+                size_type numBlocks = std::max(wholeCap*3,(s/10)*3);
+                size_type halfBlock = numBlocks/3;
+                newCont = _pa.allocate(numBlocks);
+                size_type ind;
+                size_type counter = 0;
+                // cout << "New Container Addresses" << endl;
+                for(ind = 0; ind < numBlocks; ++ind){
+                    if((ind >= halfBlock) && (ind < halfBlock + wholeCap)){
+                        newCont[ind] = _cont[counter];
+                        ++counter;
+                    }
+                    else
+                        newCont[ind] = _a.allocate(10);
+                    // cout << newCont[ind] << endl;
+                }
+                _bi = newCont + halfBlock;
+                _ei = newCont + halfBlock + from_EIto_BI;
+                _pa.deallocate(_cont,wholeCap);
+                _cont = newCont;   
+                _cbi = _cont;
+                _cei = &_cont[numBlocks-1];
+                //print_deque();
+                resize(s,v);
             }
-        }};
+            assert(valid());}
+
+        // ----
+        // size
+        // ----
+
+        /**
+         * <your documentation>
+         */
+        size_type size () const {
+            return _size;}
+
+        // ----
+        // swap
+        // ----
+
+        /**
+         * <your documentation>
+         */
+        void swap (my_deque&) {
+            assert(valid());}};
 
 #endif // Deque_h

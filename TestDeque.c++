@@ -124,7 +124,7 @@ TYPED_TEST_CASE(TestDeque, my_types);
 //     md = md2;
 // }
 
-TYPED_TEST(TestDeque, Iterator) {
+TYPED_TEST(TestDeque, constructors) {
     typedef typename TestFixture::deque_type      deque_type;
     typedef typename TestFixture::allocator_type  allocator_type;
     typedef typename TestFixture::value_type      value_type;
@@ -135,15 +135,23 @@ TYPED_TEST(TestDeque, Iterator) {
     typedef typename TestFixture::reference       reference;
     typedef typename TestFixture::const_reference const_reference;
 
-    my_deque<int> md = my_deque<int>(13,2);
-    md.print_deque();
+    //my_deque<int> md = my_deque<int>(13,2);
+    //md.print_deque();
 
-    my_deque<int> md1 = my_deque<int>(28,5);
+    my_deque<int> md1 = my_deque<int>(34,5);
     md1.print_deque();
 
     my_deque<int> md3 = my_deque<int>(md1);
-    // my_deque<int>::iterator b = md1.begin(); 
-    // my_deque<int>::iterator e = md1.end(); 
+    my_deque<int> md4 = md3;
 
-   md3.print_deque();
+cout << "Think it wrorks now \n" << endl;
+    md4.resize(86,6);
+     // my_deque<int>::iterator b = md4.begin();
+     // my_deque<int>::iterator e = md4.end();
+     //         while(b!=e){
+     //             cout << *b;
+     //             ++b;
+     //         }
+     //         cout <<endl;
+    md4.print_deque();
 }
