@@ -975,7 +975,6 @@ class my_deque {
             size_type endCap = _cei - _ei;
             size_type from_EIto_BI = _ei - _bi;
             size_type temp = (10*endCap + (9-(_e - *_ei)));
-
             T** i;
             if(s == _size)
                 return;
@@ -1003,8 +1002,6 @@ class my_deque {
             } else{
                 T** newCont;
                 _pa = std::allocator<T*>();
-                
-
                 size_type numBlocks = wholeCap*3;
                 if(numBlocks == 0)
                     numBlocks = s*3;
@@ -1035,9 +1032,8 @@ class my_deque {
             
             assert(valid());}
 
-            void resize_front (size_type s, const_reference v = value_type()) {
-            size_type from_EIto_BI = _ei - _bi;
-           
+            void resize_front (size_type s) {
+                size_type from_EIto_BI = _ei - _bi;
                 T** newCont;
                 _pa = std::allocator<T*>();
                 size_type wholeCap = _cei - _cbi + 1;
@@ -1086,22 +1082,9 @@ class my_deque {
          * swaps the values of the deques
          */
         void swap (my_deque& that) {
-            // if (_a == that._a) {
-            //     std::swap(_cbi , that._cbi);
-            //     std::swap(_cei , that._cei);
-            //     std::swap(_bi , that._bi);
-            //     std::swap(_ei , that._ei);
-            //     std::swap(_cei , that._cei);
-            //     std::swap(_cont , that._cont);
-            //     std::swap(_b, that._b);
-            //     std::swap(_e, that._e);
-            //     std::swap(_size , that._size);
-            // }
-            // else {
-                my_deque x(*this);
-                *this = that;
-                that = x;
-            // }
+            my_deque x(*this);
+            *this = that;
+            that = x;
             assert(valid());}};
 
 #endif // Deque_h

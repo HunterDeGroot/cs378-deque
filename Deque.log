@@ -1,0 +1,59 @@
+commit 92c17daa9ff829627e8bcec8a6316f64365818f7
+Author: Hunter DeGroot <hunterdegroot@gmail.com>
+Date:   Fri Jul 25 16:41:30 2014 -0500
+
+    Final Destination
+
+commit 6cd89819145a47dcdd9ff4b16a9becd68ecc8c67
+Author: Robinson Nguyen <robinson_nguyen@hotmail.com>
+Date:   Fri Jul 25 12:44:09 2014 -0500
+
+    All Tests Work
+
+commit 8ce06d2bc7952451cb38fc814413abb35c91d532
+Author: Robinson Nguyen <robinson_nguyen@hotmail.com>
+Date:   Fri Jul 25 03:32:50 2014 -0500
+
+    Half the tests work somehow
+
+commit 33047bf2dd13dee0728cb54d3ef6f16d775ce9b8
+Author: Hunter DeGroot <hunterdegroot@gmail.com>
+Date:   Thu Jul 24 15:27:29 2014 -0500
+
+    Still working on resize
+
+commit 282c87b45f9c38506accd5db5f98d6e9c3d800a1
+Author: Hunter DeGroot <hunterdegroot@gmail.com>
+Date:   Thu Jul 24 00:13:19 2014 -0500
+
+    full bugged implementation
+
+commit 045d8f195fbdc25c8fb3de7e6a612aa3e6ca90d2
+Author: Hunter DeGroot <hunterdegroot@gmail.com>
+Date:   Tue Jul 22 23:25:10 2014 -0500
+
+    fixed md(my_deque) constructor
+
+commit 0bddbcd8ec8935dd6403e56012820e4f909804a4
+Author: Hunter DeGroot <hunterdegroot@gmail.com>
+Date:   Tue Jul 22 19:15:53 2014 -0500
+
+    added print
+
+commit 4e7ecf90fb34c4b3df2892c05e8b94b26eedc05c
+Author: Hunter DeGroot <hunterdegroot@gmail.com>
+Date:   Tue Jul 22 14:25:22 2014 -0500
+
+    subscript works
+
+commit 83f700265c8a3722702528caa081cd99571e7c64
+Author: Hunter DeGroot <hunterdegroot@gmail.com>
+Date:   Wed Jul 16 17:19:13 2014 -0500
+
+    Skele files
+
+commit e853924eae2f65c5bd432429376f03f81ef9cd4d
+Author: HunterDeGroot <hunterdegroot@gmail.com>
+Date:   Tue Jul 15 19:32:08 2014 -0500
+
+    Initial commit
