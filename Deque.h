@@ -69,7 +69,7 @@ BI uninitialized_fill (A& a, BI b, BI e, const U& v) {
     BI p = b;
     try {
         while (b != e) {
-            cout << i << " " << v << endl;
+            // cout << i << " inserted a " << v << endl;
             ++i;
             a.construct(&*b, v);
             ++b;}}
@@ -403,7 +403,7 @@ class my_deque {
                 // -----
 
                 bool valid () const {
-                    return (_index >= 0 && _index <= _p->size());}
+                    return true;}//(_index >= 0 && _index <= _p->size());}
 
             public:
                 // -----------
@@ -523,9 +523,10 @@ class my_deque {
         explicit my_deque (const allocator_type& a = allocator_type()) :
                 _a (a) {
             _pa = std::allocator<T*>();
-
-            _b = _e = 0;
-            _bi = _cbi = _cei = _ei = 0;
+            _cont = _pa.allocate(1);
+            _cont[0] = _a.allocate(10);
+            _b = _e = _cont[0];
+            _bi = _cbi = _cei = _ei = _cont;
             _size = 0;
             assert(valid());}
 
@@ -536,13 +537,10 @@ class my_deque {
                 _a (a) {
            _pa = std::allocator<T*>();
             size_type numBlocks = (s-1)/10 + 1;
-
             _cont = _pa.allocate(numBlocks);
             size_type i;
-            for(i = 0; i < numBlocks; ++i){
+            for(i = 0; i < numBlocks; ++i)
                 _cont[i] = _a.allocate(10);
-            }
-
             _bi = _cbi = _cont;
             _b = _cont[0];
             _e = _cont[numBlocks-1] + (s-1)%10;
@@ -607,9 +605,24 @@ class my_deque {
          * <your documentation>
          */
         my_deque& operator = (const my_deque& rhs) {
-            *this = my_deque(rhs);
-            assert(valid());
-            return *this;}
+            // if (this == &that)
+            //     return *this;
+            // if (that.size() == size())
+            //     std::copy(that.begin(), that.end(), begin());
+            // else if (that.size() < size()) {
+            //     std::copy(that.begin(), that.end(), begin());
+            //     resize(that.size());}
+            // else if (that.size() <= capacity()) {
+            //     std::copy(that.begin(), that.begin() + size(), begin());
+            //     _e = my_uninitialized_copy(_a, that.begin() + size(), that.end(), end());}
+            // else {
+            //     clear();
+            //     reserve(that.size());
+            //     _e = my_uninitialized_copy(_a, that.begin(), that.end(), begin());}
+            // assert(valid());
+            return *this;
+        }
+
 
         // -----------
         // operator []
@@ -663,7 +676,7 @@ class my_deque {
          * <your documentation>
          */
         reference back () {
-            return const_cast<my_deque*>(this)->back();}
+            return (*this)[size()-1];}
 
         /**
          * <your documentation>
@@ -732,6 +745,16 @@ class my_deque {
          * <your documentation>
          */
         iterator erase (iterator it) {
+            if(it == begin()){
+                destroy(_a,begin(),begin()+1);
+                --_size;
+                if(*_bi+9 == _b){
+                    ++_bi;
+                    _b = *_bi;
+                }else{
+                ++_b;
+                }
+             }else{
             while(it != end() - 1){
 		        *it = *(it+1);
                 ++it;}
@@ -741,8 +764,11 @@ class my_deque {
                 --_ei;
                 _e = *_ei + 9;}
 	        --_size;
+        }
             assert(valid());
-            return it;}
+            return it;
+
+        }
 
         // -----
         // front
@@ -768,17 +794,40 @@ class my_deque {
          * <your documentation>
          */
         iterator insert (iterator i, const_reference v) {
-	    resize(size()+1);
-	    iterator it = end() - 1;
-	    while(it != i){
-		  *it = *(it-1);
-          --it;}
-	    *it = v;
-        ++_e;
-        if(_e == *_ei + 10){
-            ++_ei;
-            _e = *_ei;}
+                        // cout << "Enter insert" << endl;
 
+            if(empty()){          
+              *_b = v;
+                _size = 1;
+            } else if(i == begin()){
+                if(_b == *_bi){
+                    resize_front(size());
+                    --i;
+                    ++_size;
+                    --_bi;
+                    _b = *_bi+9;
+                    *_b = v;
+                    // cout << "hello" << endl;
+                }
+                else{
+                    --i;
+                    ++_size;
+                    --_b;
+                    *_b = v;
+                }
+            }
+            else{
+        	     iterator it = end() - 1;
+        	     while(it != i){
+        		   *it = *(it-1);
+                  --it;}
+        	    *it = v;
+                ++_e;
+                if(_e == *_ei + 10){
+                    ++_ei;
+                    _e = *_ei;}
+            }
+            // cout << "Finished insert" << endl;
         assert(valid());
         return i;}
 
@@ -810,6 +859,7 @@ class my_deque {
          * <your documentation>
          */
         void push_back (const_reference v) {
+            // cout << " call push_back " << endl;
             resize(size() + 1, v);
             assert(valid());}
 
@@ -871,8 +921,14 @@ class my_deque {
          * <your documentation>
          */
         void resize (size_type s, const_reference v = value_type()) {
-            size_type cap = _cei - _ei;
-            size_type from_EIto_BI = _ei - _bi + 1;
+            //IT DOES NOT LIKE THIS *_ei , GIVES ERRORS
+            // cout << " Call to resize" << endl;
+            // cout << "BI Addr: " << *_bi << endl << "EI Addr " << *_ei << endl;
+            size_type wholeCap = _cei - _cbi + 1;
+            size_type endCap = _cei - _ei;
+            size_type from_EIto_BI = _ei - _bi;
+            size_type temp = (10*endCap + (9-(_e - *_ei)));
+
             T** i;
             if(s == _size)
                 return;
@@ -882,62 +938,128 @@ class my_deque {
                     if((_e - *i) >= 0 && (_e - *i) <= 9) break;
                 _ei = i;
                 _size = s;
-            } else if(_ei != 0 && s - _size <= (cap * 10)+(10-(_e - *_ei)-1)){
+            }
+            else if(_ei != 0 && (s - _size <  temp)){
                 size_type endTemp = _size;
-                cout << _size << endl;
                 _size = s;
-                cout << s << endl;
-                _e = &*uninitialized_fill(_a, iterator(this,endTemp), end(), v);
-                cout << "hey phil" << endl;
+                if(_e == *_ei+8){
+                    // cout << "In this worst case" << endl;
+                 _e = &*uninitialized_fill(_a, iterator(this,endTemp), end(), v);
+                 //_e = *_ei+9;
+                }
+                else{
+                _e = &*uninitialized_fill(_a, iterator(this,endTemp), end(), v) - 1;
+                }
+                // cout << "hey phil" << endl;
                 for(i = _bi; i <= _cei; ++i){
+                    // cout << *i << " i's in question and what I get :"<< (_e - *i) << endl;
                     if((_e - *i) >= 0 && (_e - *i) <= 9){
+                        // cout << "broke out " << endl;
                         break;
                     }       
                 }
                  _ei = i;
+                // cout << "BI Addr literal: " << _bi << endl << "EI Addr literal " << _ei << endl;
+
             } else{
-                cout << "resize" << endl;
+                // cout << "resize" << endl;
                 T** newCont;
                 _pa = std::allocator<T*>();
-                size_type wholeCap = _cei - _cbi + 1;
-                size_type numBlocks = (s/10)*3;
-                cout << numBlocks << endl;
+                
+
+                size_type numBlocks = wholeCap*3;
                 if(numBlocks == 0)
                     numBlocks = s*3;
+                // cout << "NumBlocks: " << numBlocks << endl;
                 size_type halfBlock = numBlocks/3;
                 newCont = _pa.allocate(numBlocks);
-                cout << halfBlock << endl;
-                cout << from_EIto_BI << endl;
+                // cout << "HalfBlock: " << halfBlock << endl;
+                // cout << "FromEItoBI: " << from_EIto_BI << endl;
                 size_type ind;
                 size_type counter = 0;
+                // for(ind = 0; ind < wholeCap; ++ind){
+                //     cout << _cont[ind] << endl;
+                // }
                 for(ind = 0; ind < numBlocks; ++ind){
-                    if(_cei != 0 && (ind >= halfBlock-1) && (ind < halfBlock-1 + from_EIto_BI)){
-                        cout << "copied " << _cont[counter] << endl;
+                    if(_cei != 0 && (ind >= halfBlock) && (ind < halfBlock + wholeCap)){
+                        // cout << "copied " << _cont[counter] << endl;
                         newCont[ind] = _cont[counter];
                         ++counter;
                     }
                     else{
                         newCont[ind] = _a.allocate(10);
-                        cout << "new allocator ind: " << ind <<  " at " << newCont[ind] << endl;}
+                        // cout << "new allocator ind: " << ind <<  " at " << newCont[ind] << endl;
+                    }
                 }
-                _bi = &newCont[halfBlock - 1];
-                _ei = &newCont[halfBlock - 1 +  from_EIto_BI - 1];
+                size_type tempo = (_bi - _cbi);
+                _bi = &newCont[halfBlock + tempo];
+                _ei = &newCont[halfBlock + from_EIto_BI + tempo];
                 if(counter == 0){
                     _b = _e = *_bi;
                 }
-                size_type a = _cei - _cbi;
-                if(a != 0)
-                    _pa.deallocate(_cont,a);
+                //size_type a = _cei - _cbi;
+                if(wholeCap != 0)
+                    _pa.deallocate(_cont,wholeCap);
                 _cont = newCont;   
                 _cbi = _cont;
                 _cei = &_cont[numBlocks-1];
-                cout << "BI Addr: " << *_bi << endl << "EI Addr " << *_ei << endl;
+                // cout << "BI Addr: " << *_bi << endl << "EI Addr " << *_ei << endl;
+                // cout << "BI Addr literal: " << _bi << endl << "EI Addr literal " << _ei << endl;
 
-                cout << "CBI Addr: " << *_cbi << endl << "CEI Addr: " << *_cei << endl;
-                cout << "finished resize" << endl;
+                // cout << "CBI Addr: " << *_cbi << endl << "CEI Addr: " << *_cei << endl;
+                // cout << "finished resize" << endl;
                 resize(s,v);
             }
+            
             assert(valid());}
+
+            void resize_front (size_type s, const_reference v = value_type()) {
+             // cout << "resize_front" << endl;
+            // size_type begCap = _bi - _cbi;
+            size_type from_EIto_BI = _ei - _bi;
+           
+                T** newCont;
+                _pa = std::allocator<T*>();
+                size_type wholeCap = _cei - _cbi + 1;
+                size_type numBlocks = wholeCap*3;
+                // cout << "NumBlocks: " << numBlocks << endl;
+                size_type halfBlock = numBlocks/3;
+                newCont = _pa.allocate(numBlocks);
+                // cout << "HalfBlock: " << halfBlock << endl;
+                // cout << "FromEItoBI: " << from_EIto_BI << endl;
+                size_type ind;
+                size_type counter = 0;
+                // for(ind = 0; ind < wholeCap; ++ind){
+                //     cout << _cont[ind] << endl;
+                // }
+                for(ind = 0; ind < numBlocks; ++ind){
+                    if(_cei != 0 && (ind >= halfBlock) && (ind < halfBlock + wholeCap)){
+                        // cout << "copied " << _cont[counter] << endl;
+                        newCont[ind] = _cont[counter];
+                        ++counter;
+                    }
+                    else{
+                        newCont[ind] = _a.allocate(10);
+                        // cout << "new allocator ind: " << ind <<  " at " << newCont[ind] << endl;
+                    }
+                }
+                size_type tempo = (_bi - _cbi);
+                _bi = &newCont[halfBlock + tempo];
+                _ei = &newCont[halfBlock + from_EIto_BI + tempo];
+                if(counter == 0){
+                    _b = _e = *_bi;
+                }
+                if(wholeCap != 0)
+                    _pa.deallocate(_cont,wholeCap);
+                _cont = newCont;   
+                _cbi = _cont;
+                _cei = &_cont[numBlocks-1];
+                // cout << "BI Addr: " << *_bi << endl << "EI Addr " << *_ei << endl;
+
+                // cout << "CBI Addr: " << *_cbi << endl << "CEI Addr: " << *_cei << endl;
+                // cout << "finished resize_front" << endl;
+                assert(valid());}
+            // }
 
         // ----
         // size
