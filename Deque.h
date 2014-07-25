@@ -50,6 +50,7 @@ BI uninitialized_copy (A& a, II b, II e, BI x) {
     try {
         int i = 0;
         while (b != e) {
+            cout << i << " copying a " << *b << endl;
             ++i;
             a.construct(&*x, *b);
             ++b;
@@ -226,7 +227,7 @@ class my_deque {
                 // valid
                 // -----
 
-                bool valid () const {
+                bool valid () const { 
                     return (_index >= 0 && _index <= _p->size());}
 
             public:
@@ -298,14 +299,15 @@ class my_deque {
                  * <your documentation>
                  */
                 iterator& operator -- () {
-                    --_index;
+                    if(_index != 0)
+                        --_index;
                     return *this;}
 
                 /**
                  * <your documentation>
                  */
                 iterator operator -- (int) {
-                    iterator x = *this;
+                    iterator x = *this;                    
                     --(*this);
                     assert(valid());
                     return x;}
@@ -605,21 +607,41 @@ class my_deque {
          * <your documentation>
          */
         my_deque& operator = (const my_deque& rhs) {
-            // if (this == &that)
-            //     return *this;
-            // if (that.size() == size())
-            //     std::copy(that.begin(), that.end(), begin());
-            // else if (that.size() < size()) {
-            //     std::copy(that.begin(), that.end(), begin());
-            //     resize(that.size());}
-            // else if (that.size() <= capacity()) {
-            //     std::copy(that.begin(), that.begin() + size(), begin());
-            //     _e = my_uninitialized_copy(_a, that.begin() + size(), that.end(), end());}
-            // else {
-            //     clear();
-            //     reserve(that.size());
-            //     _e = my_uninitialized_copy(_a, that.begin(), that.end(), begin());}
-            // assert(valid());
+            size_type capacity = _cei-_cbi;
+            if (this == &rhs)
+                return *this;
+            if (rhs.size() == size())
+                std::copy(rhs.begin(), rhs.end(), begin());
+            else if (rhs.size() < size()) {
+                std::copy(rhs.begin(), rhs.end(), begin());
+                resize(rhs.size());}
+            else if (rhs.size() <= ((capacity+1)*10)) {
+                if(_size == 1){
+                    std::copy(rhs.begin(), rhs.begin() + 1, begin());
+                    _e = &*uninitialized_copy(_a, rhs.begin()+1, rhs.end(), end()) - 1;
+
+                }else{
+                    std::copy(rhs.begin(), rhs.begin() + size(), begin());
+                     _e = &*uninitialized_copy(_a, rhs.begin() + size(), rhs.end(), end()) - 1;
+
+                }
+                _size = rhs.size();
+            }
+            else {
+                cout << "allocated new in = " << endl;
+                clear();
+                size_type numBlocks = (rhs.size()-1)/10 +1;
+                _cont = _pa.allocate(numBlocks);
+                size_type i;
+                for(i = 0; i < numBlocks; ++i)
+                    _cont[i] = _a.allocate(10);
+                _bi = _cbi = _cont;
+                _b = _cont[0];
+                _e = _cont[numBlocks-1] + (rhs.size()-1)%10;
+                _cei = _ei = &_cont[numBlocks-1];
+                _size = rhs.size();
+                _e = &*uninitialized_copy(_a, rhs.begin(), rhs.end(), begin()) - 1;}
+            assert(valid());
             return *this;
         }
 
@@ -795,7 +817,6 @@ class my_deque {
          */
         iterator insert (iterator i, const_reference v) {
                         // cout << "Enter insert" << endl;
-
             if(empty()){          
               *_b = v;
                 _size = 1;
@@ -815,17 +836,29 @@ class my_deque {
                     --_b;
                     *_b = v;
                 }
+            }else if(i == end()){
+                resize(size()+1,v);
             }
             else{
         	     iterator it = end() - 1;
-        	     while(it != i){
-        		   *it = *(it-1);
-                  --it;}
-        	    *it = v;
-                ++_e;
+                 if(i == end() - 1){
+                    it = end();
+                    *it = *i;
+                    *i = v;
+                 }else{
+            	     while(it != i){
+                        cout << "Never here" << endl;
+                		*it = *(it-1);
+                        --it;
+                    }
+                	*it = v;
+                    ++_e;
+                }
                 if(_e == *_ei + 10){
                     ++_ei;
-                    _e = *_ei;}
+                    _e = *_ei;
+                }
+                ++_size;
             }
             // cout << "Finished insert" << endl;
         assert(valid());
@@ -1078,7 +1111,23 @@ class my_deque {
         /**
          * <your documentation>
          */
-        void swap (my_deque&) {
+        void swap (my_deque& that) {
+            // if (_a == that._a) {
+            //     std::swap(_cbi , that._cbi);
+            //     std::swap(_cei , that._cei);
+            //     std::swap(_bi , that._bi);
+            //     std::swap(_ei , that._ei);
+            //     std::swap(_cei , that._cei);
+            //     std::swap(_cont , that._cont);
+            //     std::swap(_b, that._b);
+            //     std::swap(_e, that._e);
+            //     std::swap(_size , that._size);
+            // }
+            // else {
+                my_deque x(*this);
+                *this = that;
+                that = x;
+            // }
             assert(valid());}};
 
 #endif // Deque_h
