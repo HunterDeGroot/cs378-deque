@@ -903,7 +903,10 @@ class my_deque {
          * adds element to back
          */
         void push_back (const_reference v) {
-            resize(size() + 1, v);
+            if(_cei - _ei == 0)
+	        resize(size() + 1, v);
+	    else
+		insert(end(),v);
             assert(valid());}
 
         /**

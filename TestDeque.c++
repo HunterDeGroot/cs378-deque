@@ -463,7 +463,7 @@ TYPED_TEST(TestDeque, push_back_7) {
     ALL_OF_IT
     using namespace std;
     deque_type d;
-    int NUM_OF_PUSH = 50;
+    int NUM_OF_PUSH = 2000;
     for(int i = 0; i < NUM_OF_PUSH; ++i){
         d.push_back(i);
     } 
